@@ -8,52 +8,38 @@ namespace Vitrium.Core
 {
 	public class ProjCache : GlobalProjectile
 	{
-		public static VitriBuff buff;
-		public override bool InstancePerEntity => false;
-		public override bool CloneNewInstances => false;
+		private VitriBuff buff;
+		public override bool InstancePerEntity => true;
+		public override bool CloneNewInstances => true;
 
-		public override bool PreKill(Projectile projectile, int timeLeft)
+		public override bool PreAI(Projectile projectile)
 		{
-			buff = null;
-			return base.PreKill(projectile, timeLeft);
+			try
+			{
+				var player = Main.player[projectile.owner];
+
+				if (buff == null)
+				{
+					var selected = player.inventory[player.selectedItem];
+					buff = selected.GetItem().buff;
+				}
+				else
+				{
+					player.GetPlayer().AddBuff(buff);
+				}
+			}
+			catch (Exception e)
+			{
+				Main.NewText(e.ToString(), Color.Red);
+			}
+			return base.PreAI(projectile);
 		}
 
-		public override void PostAI(Projectile projectile)
+		public override GlobalProjectile Clone()
 		{
-			if (projectile.minion && buff == null)
-			{
-				try
-				{
-					var player = Main.player[projectile.owner];
-					var item = player.inventory[player.selectedItem];
-
-					if (item != null && item.IsValid())
-					{
-						var vi = VItem.GetData(item);
-						buff = vi.buff;
-					}
-				}
-				catch (Exception e)
-				{
-					Main.NewText(e.ToString(), Color.Red);
-					Main.NewText("An error occurred when finding the buff in VProjectile.PreAI", Color.Red);
-				}
-			}
-
-			if (buff != null)
-			{
-				try
-				{
-					VPlayer.GetData(Main.player[projectile.owner]).AddBuff(buff);
-				}
-				catch (Exception e)
-				{
-					Main.NewText(e.ToString(), Color.Red);
-					Main.NewText("An error occurred when adding a buff in VProjectile.PreAI", Color.Red);
-				}
-			}
-
-			base.PostAI(projectile);
+			var clone = (ProjCache)base.Clone();
+			clone.buff = buff;
+			return clone;
 		}
 	}
 }

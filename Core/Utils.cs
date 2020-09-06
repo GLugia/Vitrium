@@ -17,7 +17,7 @@ namespace Vitrium.Core
 		public static bool IsBody(this Item item) => item.maxStack <= 1 && item.bodySlot > 0 && !item.vanity;
 		public static bool IsLegs(this Item item) => item.maxStack <= 1 && item.legSlot > 0 && !item.vanity;
 		public static bool IsWeapon(this Item item) => item.maxStack <= 1 && item.damage > 0 && item.ammo <= 0 && !item.IsTool();
-		public static bool IsSummon(this Item item) => item.summon && item.IsWeapon();
+		public static bool IsSummon(this Item item) => item.maxStack <= 1 && item.damage > 0 && item.summon;
 		public static bool IsMagic(this Item item) => item.magic && item.IsWeapon();
 		public static bool IsMelee(this Item item) => item.melee && item.IsWeapon();
 		public static bool IsRanged(this Item item) => item.ranged && item.IsWeapon();
@@ -25,6 +25,9 @@ namespace Vitrium.Core
 		public static bool IsAccessory(this Item item) => item.maxStack <= 1 && (item.accessory || item.wingSlot > 0) && !item.vanity;
 		public static bool IsValid(this Item item) => item != null && item.active && !item.IsAir && item.type > ItemID.None;
 		public static bool IsTheSameAs_(this Item item, Item item2) => item.IsValid() && item2.IsValid() && item.IsTheSameAs(item2) && VItem.GetData(item).IsTheSameAs(VItem.GetData(item2));
+
+		public static VItem GetItem(this Item item) => item != null && item.IsValid() ? VItem.GetData(item) : null;
+		public static VPlayer GetPlayer(this Player player) => player != null ? VPlayer.GetData(player) : null;
 
 		public static string NextString(this UnifiedRandom rand, int length = 20)
 		{

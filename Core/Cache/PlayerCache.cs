@@ -74,7 +74,7 @@ namespace Vitrium.Core.Cache
 				}
 			}
 
-			vp.buffs.AddRange(vp.buffbuffer);
+			vp.buffs.AddRange(vp.buffbuffer.Distinct());
 			vp.buffbuffer.Clear();
 		}
 	}
