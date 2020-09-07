@@ -33,7 +33,6 @@ namespace Vitrium
 
 		public override void Load()
 		{
-			VPlayer.GetData(Main.LocalPlayer).buffbuffer;
 			Instance = this;
 
 			AutoBuild.Load();
