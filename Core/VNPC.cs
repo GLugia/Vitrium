@@ -15,9 +15,9 @@ namespace Vitrium.Core
 			return ret;
 		}
 
-		internal List<(VitriBuff buff, int duration)> bufftuples;
-		internal List<(VitriBuff buff, int duration)> buffbuffer;
-		private IEnumerable<VitriBuff> buffs => bufftuples?.Select(a => a.buff) ?? Enumerable.Empty<VitriBuff>();
+		private List<(VitriBuff buff, int duration)> bufftuples;
+		private List<(VitriBuff buff, int duration)> buffbuffer;
+		internal IEnumerable<VitriBuff> buffs => bufftuples?.Select(a => a.buff) ?? Enumerable.Empty<VitriBuff>();
 		public T GetBuff<T>() where T : VitriBuff => (T)buffs?.FirstOrDefault(a => a.GetType() == typeof(T));
 		public NPC npc { get; private set; }
 
