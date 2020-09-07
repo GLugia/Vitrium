@@ -18,8 +18,5 @@
     <Folder Include="Buffs\Tools\Hammers\" />
     <Folder Include="Buffs\Tools\Rods\" />
     <Folder Include="Buffs\Tools\Picks\" />
-    <Folder Include="Buffs\Weapons\Melee\" />
-    <Folder Include="Buffs\Weapons\Magic\" />
-    <Folder Include="Buffs\Weapons\Ranged\" />
   </ItemGroup>
 </Project>

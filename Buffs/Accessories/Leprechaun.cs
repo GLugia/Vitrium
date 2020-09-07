@@ -1,4 +1,5 @@
 ﻿using Terraria.ID;
+using Terraria.Utilities;
 using Vitrium.Core;
 
 namespace Vitrium.Buffs.Accessories
@@ -7,15 +8,16 @@ namespace Vitrium.Buffs.Accessories
 	{
 		public override string Name => "Luck of the Irish";
 		public override string Tooltip => "Follow the rainbow";
-		public override string Texture => $"Terraria/Buff_{BuffID.Midas}";
+		public override string Texture => $"Terraria/Buff_{BuffID.LeafCrystal}";
 
 		public override bool PreNPCLoot(VNPC npc) // @TODO weighted money rates
 		{
-			// 0.5, 30
-			// 1, 50
-			// 1.5, 15
-			// 2, 5
-			npc.npc.value *= 2;
+			WeightedRandom<double> wr = new WeightedRandom<double>();
+			wr.Add(0.5, 30f);
+			wr.Add(1, 50f);
+			wr.Add(1.5, 15f);
+			wr.Add(2, 5f);
+			npc.npc.value = (int)(npc.npc.value * wr.Get());
 			return base.PreNPCLoot(npc);
 		}
 	}

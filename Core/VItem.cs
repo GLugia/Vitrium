@@ -153,7 +153,7 @@ namespace Vitrium.Core
 
 						if (name != -1)
 						{
-							tooltips.Insert(++name, new TooltipLine(Vitrium.Instance, "V:I:Bufftip", data.Name) { overrideColor = Terraria.ID.Colors.RarityRed });
+							tooltips.Insert(++name, new TooltipLine(Vitrium.Instance, "V:I:Bufftip", data.Name) { overrideColor = Terraria.ID.Colors.RarityPurple });
 						}
 					}
 				}

@@ -207,5 +207,25 @@ namespace Vitrium.Core
 				buff.OnHitAnything(this, x, y, victim);
 			}
 		}
+
+		public override void OnConsumeAmmo(Item weapon, Item ammo)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.OnConsumeAmmo(this, weapon, ammo);
+			}
+		}
+
+		public override bool ConsumeAmmo(Item weapon, Item ammo)
+		{
+			bool b = base.ConsumeAmmo(weapon, ammo);
+
+			foreach (VitriBuff buff in buffs)
+			{
+				b &= buff.ConsumeAmmo(this, weapon, ammo);
+			}
+
+			return b;
+		}
 	}
 }

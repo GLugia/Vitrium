@@ -93,6 +93,11 @@ namespace Vitrium.Buffs
 
 		public virtual void AI(VNPC npc) { }
 		public virtual void EditSpawnRate(VPlayer player, ref int spawnRate, ref int maxSpawns) { }
+		public virtual void OnConsumeAmmo(VPlayer player, Item weapon, Item ammo) { }
+		public virtual bool ConsumeAmmo(VPlayer player, Item weapon, Item ammo)
+		{
+			return true;
+		}
 
 		// Collision methods
 		public virtual bool PreHurt(VPlayer player, bool pvp, bool quiet, ref int damage, ref int hitDirection, ref bool crit, ref bool customDamage, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
