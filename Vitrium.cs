@@ -112,6 +112,24 @@ namespace Vitrium
 			Instance = null;
 		}
 
+		public override void PreUpdateEntities()
+		{
+			foreach (var proj in Main.projectile.Where(a => a != null && a.active && a.minion))
+			{
+				ProjCache.GetData(proj).ApplyBuffs();
+			}
+
+			foreach (var player in Main.player.Where(a => a != null && a.active))
+			{
+				VPlayer.GetData(player).ApplyBuffs();
+			}
+
+			foreach (var npc in Main.npc.Where(a => a != null && a.active))
+			{
+				VNPC.GetData(npc).ApplyBuffs();
+			}
+		}
+
 		public static int GetVanillaBuff(string name)
 		{
 			if (VanillaBuffs != null)

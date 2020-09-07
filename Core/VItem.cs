@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.Utilities;
@@ -96,7 +95,6 @@ namespace Vitrium.Core
 
 		public override bool NeedsSaving(Item item) => buff != null && Hash != null;
 
-		// @TODO not loading the right buffs for some reason
 		public override void Load(Item item, TagCompound tag)
 		{
 			Hash = tag.GetString("ItemHash");

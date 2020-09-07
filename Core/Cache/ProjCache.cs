@@ -1,45 +1,40 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Terraria;
 using Terraria.ModLoader;
 using Vitrium.Buffs;
 
 namespace Vitrium.Core
 {
-	public class ProjCache : GlobalProjectile
+	public class ProjCache :  GlobalProjectile
 	{
+		public static ProjCache GetData(Projectile proj)
+		{
+			var ret = proj.GetGlobalProjectile<ProjCache>();
+			ret.projectile = proj;
+			return ret;
+		}
+
 		private VitriBuff buff;
+		public Projectile projectile { get; private set; }
+
 		public override bool InstancePerEntity => true;
 		public override bool CloneNewInstances => true;
 
-		public override bool PreAI(Projectile projectile)
+		public override void PostAI(Projectile projectile)
 		{
-			try
+			if (projectile.minion && buff == null)
 			{
-				var player = Main.player[projectile.owner];
-
-				if (buff == null)
-				{
-					var selected = player.inventory[player.selectedItem];
-					buff = selected.GetItem().buff;
-				}
-				else
-				{
-					player.GetPlayer().AddBuff(buff);
-				}
+				buff = VItem.GetData(Main.player[projectile.owner].inventory[Main.player[projectile.owner].selectedItem]).buff;
 			}
-			catch (Exception e)
-			{
-				Main.NewText(e.ToString(), Color.Red);
-			}
-			return base.PreAI(projectile);
 		}
 
-		public override GlobalProjectile Clone()
+		internal void ApplyBuffs()
 		{
-			var clone = (ProjCache)base.Clone();
-			clone.buff = buff;
-			return clone;
+			VPlayer.GetData(Main.player[projectile.owner]).AddBuff(buff);
 		}
 	}
 }

@@ -1,5 +1,4 @@
-﻿using log4net.Appender;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
@@ -16,27 +15,38 @@ namespace Vitrium.Core
 			return ret;
 		}
 
-		internal List<VitriBuff> buffs;
-		internal List<VitriBuff> buffbuffer;
+		internal List<(VitriBuff buff, int duration)> bufftuples;
+		internal List<(VitriBuff buff, int duration)> buffbuffer;
+		private IEnumerable<VitriBuff> buffs => bufftuples?.Select(a => a.buff) ?? Enumerable.Empty<VitriBuff>();
 		public T GetBuff<T>() where T : VitriBuff => (T)buffs?.FirstOrDefault(a => a.GetType() == typeof(T));
 		public NPC npc { get; private set; }
 
-		public void AddBuff(VitriBuff buff)
+		public void AddBuff(VitriBuff buff, int duration = 2)
 		{
-			if (buff != null && !buffs.Contains(buff))
+			if (buff != null && !buffbuffer.Select(a => a.buff).Contains(buff))
+			{
+				buffbuffer.Add((buff, duration));
+			}
+		}
+
+		internal void ApplyBuffs()
+		{
+			bufftuples.Clear();
+			bufftuples.AddRange(buffbuffer);
+			buffbuffer.Clear();
+
+			foreach (var (buff, duration) in bufftuples)
 			{
 				var vanilla = Vitrium.GetVanillaBuff(buff.Name);
 
 				if (vanilla != -1)
 				{
-					npc.AddBuff(vanilla, 2);
+					npc.AddBuff(vanilla, duration);
 				}
 				else
 				{
-					npc.AddBuff(buff.Type, 2);
+					npc.AddBuff(buff.Type, duration);
 				}
-
-				buffbuffer.Add(buff);
 			}
 		}
 
@@ -45,17 +55,13 @@ namespace Vitrium.Core
 
 		public override void SetDefaults(NPC npc)
 		{
-			buffs = new List<VitriBuff>();
-			buffbuffer = new List<VitriBuff>();
+			bufftuples = new List<(VitriBuff, int)>();
+			buffbuffer = new List<(VitriBuff, int)>();
 			this.npc = npc;
 		}
 
 		public override void ResetEffects(NPC npc)
 		{
-			buffs.Clear();
-			buffs.AddRange(buffbuffer);
-			buffbuffer.Clear();
-
 			foreach (var buff in buffs)
 			{
 				buff.ResetEffects(this);

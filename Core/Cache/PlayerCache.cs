@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.ModLoader;
-using Vitrium.Buffs;
 
 namespace Vitrium.Core.Cache
 {
@@ -26,7 +20,6 @@ namespace Vitrium.Core.Cache
 		public override void PostUpdate()
 		{
 			var vp = VPlayer.GetData(player);
-			vp.buffs.Clear();
 
 			if (Main.mouseItem != mouse)
 			{
@@ -65,17 +58,9 @@ namespace Vitrium.Core.Cache
 
 				if (equips[i] != null && equips[i].IsValid() && equips[i].Enchantable())
 				{
-					var buff = VItem.GetData(equips[i]).buff;
-					if (buff != null)
-					{
-						//Main.NewText($"Added {buff.Name}");
-						vp.AddBuff(buff);
-					}
+					vp.AddBuff(VItem.GetData(equips[i]).buff);
 				}
 			}
-
-			vp.buffs.AddRange(vp.buffbuffer.Distinct());
-			vp.buffbuffer.Clear();
 		}
 	}
 }
