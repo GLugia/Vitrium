@@ -19,7 +19,7 @@ namespace Vitrium.Core.Cache
 
 		public override void PostUpdate()
 		{
-			var vp = VPlayer.GetData(player);
+			VPlayer vp = VPlayer.GetData(player);
 
 			if (Main.mouseItem != mouse)
 			{
@@ -53,7 +53,7 @@ namespace Vitrium.Core.Cache
 				if (equips[i] != player.armor[i])
 				{
 					equips[i] = player.armor[i]; // cache player armor and accessories that aren't vanity or dyes
-					//Main.NewText($"Equipped {equips[i]?.Name}");
+												 //Main.NewText($"Equipped {equips[i]?.Name}");
 				}
 
 				if (equips[i] != null && equips[i].IsValid() && equips[i].Enchantable())

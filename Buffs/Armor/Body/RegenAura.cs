@@ -6,28 +6,30 @@ namespace Vitrium.Buffs.Armor.Body
 {
 	public sealed class RegenBuff : VitriBuff
 	{
-		public override bool ApplicableTo(Item item) => false;
+		public override bool ApplicableTo(Item item)
+		{
+			return false;
+		}
 
-		public override string Name => "Regeneration Aura";
-		public override string BuffTooltip => "You are affected by a party member's aura";
+		public override string Name => "Heaven's Resort";
+		public override string Tooltip => "Would you like Tulslaeh to massage you?";
 		public override string Texture => "Vitrium/Buffs/Armor/Body/LifeFlat";
 
 		public override void UpdateLifeRegen(VPlayer player)
 		{
-			player.player.lifeRegen += 10;
+			player.player.lifeRegen += 25;
 		}
 
 		public override void UpdateLifeRegen(VNPC npc, ref int damage)
 		{
-			npc.npc.lifeRegen += 10;
+			npc.npc.lifeRegen += 25;
 		}
 	}
 
 	public class RegenAura : BodyBuff
 	{
-		public override string Name => "Healer's";
-		public override string ItemTooltip => "Some call you \"Tulslaeh\"";
-		public override string BuffTooltip => "Nearby party regenerate more Life";
+		public override string Name => "Heaven's Resort";
+		public override string Tooltip => "Some call you \"Tulslaeh\"";
 		public override string Texture => "Vitrium/Buffs/Armor/Body/LifeFlat";
 
 		public override void ResetEffects(VPlayer player)
@@ -37,15 +39,15 @@ namespace Vitrium.Buffs.Armor.Body
 
 		public override void PostUpdate(VPlayer player)
 		{
-			var buff = Vitrium.GetBuff<RegenBuff>();
+			RegenBuff buff = Vitrium.GetBuff<RegenBuff>();
 			player.player.buffImmune[buff.Type] = true;
 
-			foreach (var member in Main.player.Where(a => a.active && a.team == player.player.team && player.player.Distance(a.Center) <= 1600))
+			foreach (Player member in Main.player.Where(a => a.active && a.team == player.player.team && player.player.Distance(a.Center) <= 1600))
 			{
 				VPlayer.GetData(member).AddBuff(buff);
 			}
 
-			foreach (var npc in Main.npc.Where(a => a.active && (a.townNPC || a.friendly) && player.player.Distance(a.Center) <= 1600))
+			foreach (NPC npc in Main.npc.Where(a => a.active && (a.townNPC || a.friendly) && player.player.Distance(a.Center) <= 1600))
 			{
 				VNPC.GetData(npc).AddBuff(buff);
 			}

@@ -5,6 +5,9 @@ namespace Vitrium.Buffs.Armor.Legs
 {
 	public abstract class LegBuff : VitriBuff
 	{
-		public sealed override bool ApplicableTo(Item item) => item.IsLegs();
+		public sealed override bool ApplicableTo(Item item)
+		{
+			return item.IsLegs();
+		}
 	}
 }

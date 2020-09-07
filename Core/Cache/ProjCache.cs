@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria;
+﻿using Terraria;
 using Terraria.ModLoader;
 using Vitrium.Buffs;
 
-namespace Vitrium.Core
+namespace Vitrium.Core.Cache
 {
-	public class ProjCache :  GlobalProjectile
+	public class ProjCache : GlobalProjectile
 	{
 		public static ProjCache GetData(Projectile proj)
 		{
-			var ret = proj.GetGlobalProjectile<ProjCache>();
+			ProjCache ret = proj.GetGlobalProjectile<ProjCache>();
 			ret.projectile = proj;
 			return ret;
 		}

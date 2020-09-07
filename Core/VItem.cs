@@ -13,26 +13,30 @@ namespace Vitrium.Core
 {
 	public class VItem : GlobalItem
 	{
-		public static VItem GetData(Item item) => item?.GetGlobalItem<VItem>() ?? null;
+		public static VItem GetData(Item item)
+		{
+			return item?.GetGlobalItem<VItem>() ?? null;
+		}
+
 		public VitriBuff buff;
 		public string Hash = "";
 
 		public VitriBuff[] NewBuffs(Item item)
 		{
-			var wr = new WeightedRandom<VitriBuff>();
+			WeightedRandom<VitriBuff> wr = new WeightedRandom<VitriBuff>();
 
-			foreach (var buff in Vitrium.VitriBuffs.Where(a => a.IApplicableTo(item)))
+			foreach (VitriBuff buff in Vitrium.VitriBuffs.Where(a => a.IApplicableTo(item)))
 			{
 				wr.Add(buff, buff.Weight);
 				wr.Add(null, buff.Weight * 0.25f);
 			}
 
-			var ret = new VitriBuff[3];
+			VitriBuff[] ret = new VitriBuff[3];
 
 			int j = 0;
 			for (int i = 0; i < 3; i++)
 			{
-				var buff = wr.Get();
+				VitriBuff buff = wr.Get();
 
 				ret[j] = wr.Get();
 
@@ -47,8 +51,8 @@ namespace Vitrium.Core
 
 		public override bool OnPickup(Item item, Player player) // @TODO only if null and has not rolled
 		{
-			var data = GetData(item);
-			var buffs = NewBuffs(item);
+			VItem data = GetData(item);
+			VitriBuff[] buffs = NewBuffs(item);
 			data.buff = buffs[Main.rand.Next(0, buffs.Length)];
 			data.Hash = Main.rand.NextString();
 			return base.OnPickup(item, player);
@@ -56,8 +60,8 @@ namespace Vitrium.Core
 
 		public override void PostReforge(Item item)
 		{
-			var data = GetData(item);
-			var buffs = NewBuffs(item);
+			VItem data = GetData(item);
+			VitriBuff[] buffs = NewBuffs(item);
 			data.buff = buffs[Main.rand.Next(0, buffs.Length)];
 			data.Hash = Main.rand.NextString();
 			base.PostReforge(item);
@@ -65,8 +69,8 @@ namespace Vitrium.Core
 
 		public override void OnCraft(Item item, Recipe recipe)
 		{
-			var data = GetData(item);
-			var buffs = NewBuffs(item);
+			VItem data = GetData(item);
+			VitriBuff[] buffs = NewBuffs(item);
 			data.buff = buffs[Main.rand.Next(0, buffs.Length)];
 			data.Hash = Main.rand.NextString();
 			base.OnCraft(item, recipe);
@@ -82,7 +86,10 @@ namespace Vitrium.Core
 			}
 		}
 
-		public bool IsTheSameAs(VItem item) => Hash == item.Hash;
+		public bool IsTheSameAs(VItem item)
+		{
+			return Hash == item.Hash;
+		}
 
 		public override bool InstancePerEntity => true;
 		public override bool CloneNewInstances => true;
@@ -93,31 +100,27 @@ namespace Vitrium.Core
 			buff = item.buff;
 		}
 
-		public override bool NeedsSaving(Item item) => buff != null && Hash != null;
+		public override bool NeedsSaving(Item item)
+		{
+			return buff != null && Hash != null;
+		}
 
 		public override void Load(Item item, TagCompound tag)
 		{
 			Hash = tag.GetString("ItemHash");
-
-			if (tag.ContainsKey("ItemBuff"))
-			{
-				buff = (VitriBuff)Vitrium.Instance.GetBuff(tag.GetString("ItemBuff"));
-				buff.Load(item, tag);
-			}
+			buff = (VitriBuff)Vitrium.Instance.GetBuff(tag.GetString("ItemBuff"));
+			buff?.Load(item, tag);
 		}
 
 		public override TagCompound Save(Item item)
 		{
-			var tag = new TagCompound()
+			TagCompound tag = new TagCompound()
 			{
-				{ "ItemHash", Hash }
+				{ "ItemHash", Hash },
+				{ "ItemBuff", buff?.UnderlyingName }
 			};
 
-			if (buff != null)
-			{
-				tag.Add("ItemBuff", buff.UnderlyingName);
-				buff.Save(item, tag);
-			}
+			buff?.Save(item, tag);
 
 			return tag;
 		}
@@ -131,13 +134,8 @@ namespace Vitrium.Core
 		public override void NetReceive(Item item, BinaryReader reader)
 		{
 			Hash = reader.ReadString();
-			var name = reader.ReadString();
-
-			if (name != null)
-			{
-				buff = (VitriBuff)Vitrium.Instance.GetBuff(name);
-				buff.NetReceive(item, reader);
-			}
+			buff = (VitriBuff)Vitrium.Instance.GetBuff(reader.ReadString());
+			buff?.NetReceive(item, reader);
 		}
 
 		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
@@ -148,20 +146,14 @@ namespace Vitrium.Core
 
 				try
 				{
-					var data = GetData(item).buff;
+					VitriBuff data = GetData(item).buff;
 					if (data != null)
 					{
-						var name = tooltips.FindIndex(a => a.mod == "Terraria" && a.Name == "ItemName");
+						int name = tooltips.FindIndex(a => a.mod == "Terraria" && a.Name == "ItemName");
 
 						if (name != -1)
 						{
-							var old = tooltips.ElementAt(name);
-							old.text = $"{new string(buff.Name.Replace("Aura", "").Replace("Buff", "").Replace("Debuff", "").Trim(' ').ToArray())} {old.text}";
-							old.overrideColor = Main.DiscoColor;
-							tooltips.RemoveAt(name);
-
-							tooltips.Insert(name, old);
-							tooltips.Insert(++name, new TooltipLine(Vitrium.Instance, "V:I:Bufftip", data.ItemTooltip) { overrideColor = Main.DiscoColor });
+							tooltips.Insert(++name, new TooltipLine(Vitrium.Instance, "V:I:Bufftip", data.Name) { overrideColor = Terraria.ID.Colors.RarityRed });
 						}
 					}
 				}

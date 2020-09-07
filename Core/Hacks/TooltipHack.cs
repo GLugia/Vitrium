@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -14,16 +12,16 @@ namespace Vitrium.Core.Hacks
 	{
 		public static void FixTooltips(Item item, List<TooltipLine> tooltips)
 		{
-			var vn = tooltips.Where(a => a.mod.Equals("Terraria")).ToArray();
-			var nitem = new Item();
+			TooltipLine[] vn = tooltips.Where(a => a.mod.Equals("Terraria")).ToArray();
+			Item nitem = new Item();
 			nitem.netDefaults(item.netID);
 
-			var pref = nitem.Clone();
+			Item pref = nitem.Clone();
 			pref.Prefix(item.prefix);
 
 			try
 			{
-				foreach (var v in vn)
+				foreach (TooltipLine v in vn)
 				{
 					double on = 0d;
 					string ntt = v.text;

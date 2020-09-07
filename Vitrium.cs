@@ -1,17 +1,14 @@
 using log4net;
 using Microsoft.Xna.Framework;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Vitrium.Buffs;
-using Vitrium.Buffs.Armor.Body;
 using Vitrium.Core;
 using Vitrium.Core.Cache;
 using Vitrium.UI;
@@ -114,17 +111,17 @@ namespace Vitrium
 
 		public override void PreUpdateEntities()
 		{
-			foreach (var proj in Main.projectile.Where(a => a != null && a.active && a.minion))
+			foreach (Projectile proj in Main.projectile.Where(a => a != null && a.active && a.minion))
 			{
 				ProjCache.GetData(proj).ApplyBuffs();
 			}
 
-			foreach (var player in Main.player.Where(a => a != null && a.active))
+			foreach (Player player in Main.player.Where(a => a != null && a.active))
 			{
 				VPlayer.GetData(player).ApplyBuffs();
 			}
 
-			foreach (var npc in Main.npc.Where(a => a != null && a.active))
+			foreach (NPC npc in Main.npc.Where(a => a != null && a.active))
 			{
 				VNPC.GetData(npc).ApplyBuffs();
 			}
@@ -134,7 +131,7 @@ namespace Vitrium
 		{
 			if (VanillaBuffs != null)
 			{
-				var first = VanillaBuffs.FirstOrDefault(a => CultureInfo.InvariantCulture.CompareInfo.IndexOf(a.Name, name) >= 0);
+				FieldInfo first = VanillaBuffs.FirstOrDefault(a => a.Name.IsSimilarTo(name));
 
 				if (first != null)
 				{
@@ -145,6 +142,9 @@ namespace Vitrium
 			return -1;
 		}
 
-		public static new T GetBuff<T>() where T : VitriBuff => (T)BuffLoader.GetBuff(ModContent.BuffType<T>());
+		public static new T GetBuff<T>() where T : VitriBuff
+		{
+			return (T)BuffLoader.GetBuff(ModContent.BuffType<T>());
+		}
 	}
 }

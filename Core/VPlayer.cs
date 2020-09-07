@@ -9,16 +9,22 @@ namespace Vitrium.Core
 {
 	public class VPlayer : ModPlayer
 	{
-		public static VPlayer GetData(Player player) => player.GetModPlayer<VPlayer>();
+		public static VPlayer GetData(Player player)
+		{
+			return player.GetModPlayer<VPlayer>();
+		}
 
 		private List<(VitriBuff buff, int duration)> bufftuples;
 		private List<(VitriBuff buff, int duration)> buffbuffer;
 		internal IEnumerable<VitriBuff> buffs => bufftuples?.Select(a => a.buff) ?? Enumerable.Empty<VitriBuff>();
-		public T GetBuff<T>() where T : VitriBuff => (T)buffs?.FirstOrDefault(a => a.GetType() == typeof(T));
+		public T GetBuff<T>() where T : VitriBuff
+		{
+			return (T)buffs?.FirstOrDefault(a => a.GetType() == typeof(T));
+		}
 
 		public void AddBuff(VitriBuff buff, int duration = 2)
 		{
-			if (buff != null && !buffbuffer.Select(a => a.buff).Contains(buff))
+			if (buff != null && !buffbuffer.Select(a => a.buff).Contains(buff) && !player.buffImmune[buff.Type])
 			{
 				buffbuffer.Add((buff, duration));
 			}
@@ -30,9 +36,9 @@ namespace Vitrium.Core
 			bufftuples.AddRange(buffbuffer);
 			buffbuffer.Clear();
 
-			foreach (var (buff, duration) in bufftuples)
+			foreach ((VitriBuff buff, int duration) in bufftuples)
 			{
-				var vanilla = Vitrium.GetVanillaBuff(buff.Name);
+				int vanilla = Vitrium.GetVanillaBuff(buff.Name);
 
 				if (vanilla != -1)
 				{
@@ -53,12 +59,12 @@ namespace Vitrium.Core
 
 		public override void SetupStartInventory(IList<Item> items, bool mediumcoreDeath)
 		{
-			foreach (var item in items)
+			foreach (Item item in items)
 			{
 				if (item != null && item.IsValid() && item.Enchantable())
 				{
-					var data = VItem.GetData(item);
-					var buffs = data.NewBuffs(item);
+					VItem data = VItem.GetData(item);
+					VitriBuff[] buffs = data.NewBuffs(item);
 					data.buff = buffs[Main.rand.Next(0, buffs.Count())];
 					data.Hash = Main.rand.NextString();
 				}
@@ -67,7 +73,7 @@ namespace Vitrium.Core
 
 		public override void ResetEffects()
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ResetEffects(this);
 			}
@@ -75,7 +81,7 @@ namespace Vitrium.Core
 
 		public override void PreUpdate()
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.PreUpdate(this);
 			}
@@ -83,7 +89,7 @@ namespace Vitrium.Core
 
 		public override void PostUpdate()
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.PostUpdate(this);
 			}
@@ -91,7 +97,7 @@ namespace Vitrium.Core
 
 		public override void UpdateLifeRegen()
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.UpdateLifeRegen(this);
 			}
@@ -99,7 +105,7 @@ namespace Vitrium.Core
 
 		public override void UpdateBadLifeRegen()
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.UpdateBadLifeRegen(this);
 			}
@@ -109,7 +115,7 @@ namespace Vitrium.Core
 		{
 			item = item.DeepClone();
 
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ModifyWeaponDamage(this, item, ref add, ref mult, ref flat);
 			}
@@ -117,7 +123,7 @@ namespace Vitrium.Core
 
 		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ModifyHitByNPC(this, npc, ref damage, ref crit);
 			}
@@ -125,7 +131,7 @@ namespace Vitrium.Core
 
 		public override void ModifyHitByProjectile(Projectile proj, ref int damage, ref bool crit)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ModifyHitByProjectile(this, proj, ref damage, ref crit);
 			}
@@ -135,7 +141,7 @@ namespace Vitrium.Core
 		{
 			bool b = base.PreHurt(pvp, quiet, ref damage, ref hitDirection, ref crit, ref customDamage, ref playSound, ref genGore, ref damageSource);
 
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				if (!buff.PreHurt(this, pvp, quiet, ref damage, ref hitDirection, ref crit, ref customDamage, ref playSound, ref genGore, ref damageSource))
 				{
@@ -148,7 +154,7 @@ namespace Vitrium.Core
 
 		public override void ModifyHitNPC(Item item, NPC target, ref int damage, ref float knockback, ref bool crit)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ModifyHitNPC(this, target, item, ref damage, ref knockback, ref crit);
 			}
@@ -156,7 +162,7 @@ namespace Vitrium.Core
 
 		public override void ModifyHitNPCWithProj(Projectile proj, NPC target, ref int damage, ref float knockback, ref bool crit, ref int hitDirection)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ModifyHitNPCWithProj(this, target, proj, ref damage, ref knockback, ref crit, ref hitDirection);
 			}
@@ -164,7 +170,7 @@ namespace Vitrium.Core
 
 		public override void ModifyHitPvp(Item item, Player target, ref int damage, ref bool crit)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ModifyHitPvp(this, target, item, ref damage, ref crit);
 			}
@@ -172,7 +178,7 @@ namespace Vitrium.Core
 
 		public override void ModifyHitPvpWithProj(Projectile proj, Player target, ref int damage, ref bool crit)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ModifyHitPvpWithProj(this, target, proj, ref damage, ref crit);
 			}
@@ -180,7 +186,7 @@ namespace Vitrium.Core
 
 		public override void PostUpdateEquips()
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.PostUpdateEquips(this);
 			}
@@ -188,7 +194,7 @@ namespace Vitrium.Core
 
 		public override void PostUpdateRunSpeeds()
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.PostUpdateRunSpeeds(this);
 			}
@@ -196,7 +202,7 @@ namespace Vitrium.Core
 
 		public override void OnHitAnything(float x, float y, Entity victim)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.OnHitAnything(this, x, y, victim);
 			}

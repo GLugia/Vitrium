@@ -5,6 +5,9 @@ namespace Vitrium.Buffs.Weapons.Summon
 {
 	public abstract class SummonBuff : VitriBuff
 	{
-		public override bool ApplicableTo(Item item) => item.IsSummon();
+		public override bool ApplicableTo(Item item)
+		{
+			return item.IsSummon();
+		}
 	}
 }

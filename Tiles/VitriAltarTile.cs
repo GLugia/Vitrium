@@ -55,6 +55,9 @@ namespace Vitrium.Tiles
 			num = fail ? 3 : 5;
 		}
 
-		public sealed override bool Slope(int i, int j) => false;
+		public sealed override bool Slope(int i, int j)
+		{
+			return false;
+		}
 	}
 }

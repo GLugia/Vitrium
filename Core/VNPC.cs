@@ -10,7 +10,7 @@ namespace Vitrium.Core
 	{
 		public static VNPC GetData(NPC npc)
 		{
-			var ret = npc.GetGlobalNPC<VNPC>();
+			VNPC ret = npc.GetGlobalNPC<VNPC>();
 			ret.npc = npc;
 			return ret;
 		}
@@ -18,12 +18,16 @@ namespace Vitrium.Core
 		private List<(VitriBuff buff, int duration)> bufftuples;
 		private List<(VitriBuff buff, int duration)> buffbuffer;
 		internal IEnumerable<VitriBuff> buffs => bufftuples?.Select(a => a.buff) ?? Enumerable.Empty<VitriBuff>();
-		public T GetBuff<T>() where T : VitriBuff => (T)buffs?.FirstOrDefault(a => a.GetType() == typeof(T));
+		public T GetBuff<T>() where T : VitriBuff
+		{
+			return (T)buffs?.FirstOrDefault(a => a.GetType() == typeof(T));
+		}
+
 		public NPC npc { get; private set; }
 
 		public void AddBuff(VitriBuff buff, int duration = 2)
 		{
-			if (buff != null && !buffbuffer.Select(a => a.buff).Contains(buff))
+			if (buff != null && !buffbuffer.Select(a => a.buff).Contains(buff) && !npc.buffImmune[buff.Type])
 			{
 				buffbuffer.Add((buff, duration));
 			}
@@ -35,9 +39,9 @@ namespace Vitrium.Core
 			bufftuples.AddRange(buffbuffer);
 			buffbuffer.Clear();
 
-			foreach (var (buff, duration) in bufftuples)
+			foreach ((VitriBuff buff, int duration) in bufftuples)
 			{
-				var vanilla = Vitrium.GetVanillaBuff(buff.Name);
+				int vanilla = Vitrium.GetVanillaBuff(buff.Name);
 
 				if (vanilla != -1)
 				{
@@ -62,7 +66,7 @@ namespace Vitrium.Core
 
 		public override void ResetEffects(NPC npc)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.ResetEffects(this);
 			}
@@ -70,24 +74,36 @@ namespace Vitrium.Core
 
 		public override void EditSpawnRate(Player player, ref int spawnRate, ref int maxSpawns)
 		{
-			var vp = VPlayer.GetData(player);
-			foreach (var buff in vp.buffs)
+			VPlayer vp = VPlayer.GetData(player);
+			foreach (VitriBuff buff in vp.buffs)
 			{
 				buff.EditSpawnRate(vp, ref spawnRate, ref maxSpawns);
 			}
 		}
 
+		public override bool PreAI(NPC npc)
+		{
+			bool b = base.PreAI(npc);
+
+			foreach (VitriBuff buff in buffs)
+			{
+				b &= buff.PreAI(this);
+			}
+
+			return b;
+		}
+
 		public override void AI(NPC npc)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
-				buff.NPCAI(this);
+				buff.AI(this);
 			}
 		}
 
 		public override bool PreNPCLoot(NPC npc)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				if (!buff.PreNPCLoot(this))
 				{
@@ -100,7 +116,7 @@ namespace Vitrium.Core
 
 		public override void UpdateLifeRegen(NPC npc, ref int damage)
 		{
-			foreach (var buff in buffs)
+			foreach (VitriBuff buff in buffs)
 			{
 				buff.UpdateLifeRegen(this, ref damage);
 			}

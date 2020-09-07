@@ -1,0 +1,21 @@
+﻿Element-based playstyle
+
+Fire	-> consistent dps
+Electric-> aoe
+Ice		-> cc
+Shadow	-> lucky
+Blood	-> burst dps
+
+Fire		+ Electric	-> Plasma
+Fire		+ Ice		-> Pressure
+Fire		+ Shadow	-> 
+Fire		+ Blood		-> 
+
+Electric	+ Ice		-> 
+Electric	+ Shadow	-> 
+Electric	+ Blood		-> 
+
+Ice			+ Shadow	-> 
+Ice			+ Blood		-> 
+
+Shadow		+ Blood		-> 

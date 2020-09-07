@@ -6,9 +6,8 @@ namespace Vitrium.Buffs.Accessories
 {
 	public class MightyPen : AccessoryBuff
 	{
-		public override string Name => "Champion's";
-		public override string BuffTooltip => "The pen is mightier than the sword";
-		public override string ItemTooltip => "Now with more stabby";
+		public override string Name => "Champion's Pen";
+		public override string Tooltip => "Now the pen really is mightier than the sword";
 		public override string Texture => $"Terraria/buff_{BuffID.Sharpened}";
 
 		public override void ModifyWeaponDamage(VPlayer player, Item item, ref float add, ref float mult, ref float flat)
