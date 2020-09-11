@@ -58,7 +58,7 @@ namespace Vitrium.Core
 		}
 
 		public override void SetupStartInventory(IList<Item> items, bool mediumcoreDeath)
-		{
+		{/*
 			foreach (Item item in items)
 			{
 				if (item != null && item.IsValid() && item.Enchantable())
@@ -68,7 +68,7 @@ namespace Vitrium.Core
 					data.buff = buffs[Main.rand.Next(0, buffs.Count())];
 					data.Hash = Main.rand.NextString();
 				}
-			}
+			}*/
 		}
 
 		public override void ResetEffects()
@@ -84,6 +84,22 @@ namespace Vitrium.Core
 			foreach (VitriBuff buff in buffs)
 			{
 				buff.PreUpdate(this);
+			}
+		}
+
+		public override void PreUpdateMovement()
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.PreUpdateMovement(this);
+			}
+		}
+
+		public override void UpdateEquips(ref bool wallSpeedBuff, ref bool tileSpeedBuff, ref bool tileRangeBuff)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.UpdateEquips(this, ref wallSpeedBuff, ref tileSpeedBuff, ref tileRangeBuff);
 			}
 		}
 
@@ -214,6 +230,37 @@ namespace Vitrium.Core
 			{
 				buff.OnConsumeAmmo(this, weapon, ammo);
 			}
+		}
+
+		public override void DrawEffects(PlayerDrawInfo drawInfo, ref float r, ref float g, ref float b, ref float a, ref bool fullBright)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.DrawEffects(this, drawInfo, ref r, ref g, ref b, ref a, ref fullBright);
+			}
+		}
+
+		public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.Kill(this, damage, hitDirection, pvp, damageSource);
+			}
+
+			bufftuples = null;
+			buffbuffer = null;
+		}
+
+		public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
+		{
+			bool b = base.PreKill(damage, hitDirection, pvp, ref playSound, ref genGore, ref damageSource);
+
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.PreKill(this, damage, hitDirection, pvp, ref playSound, ref genGore, ref damageSource);
+			}
+
+			return b;
 		}
 
 		public override bool ConsumeAmmo(Item weapon, Item ammo)

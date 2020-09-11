@@ -13,7 +13,7 @@ namespace Vitrium.Buffs.Armor.Body
 
 		public override string Name => "Heaven's Resort";
 		public override string Tooltip => "Would you like Tulslaeh to massage you?";
-		public override string Texture => "Vitrium/Buffs/Armor/Body/LifeFlat";
+		public override string Texture => "LifeFlat";
 
 		public override void UpdateLifeRegen(VPlayer player)
 		{
@@ -30,7 +30,7 @@ namespace Vitrium.Buffs.Armor.Body
 	{
 		public override string Name => "Heaven's Resort";
 		public override string Tooltip => "Some call you \"Tulslaeh\"";
-		public override string Texture => "Vitrium/Buffs/Armor/Body/LifeFlat";
+		public override string Texture => "LifeFlat";
 
 		public override void ResetEffects(VPlayer player)
 		{

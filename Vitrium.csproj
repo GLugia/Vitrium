@@ -18,5 +18,6 @@
     <Folder Include="Buffs\Tools\Hammers\" />
     <Folder Include="Buffs\Tools\Rods\" />
     <Folder Include="Buffs\Tools\Picks\" />
+    <Folder Include="Projectiles\" />
   </ItemGroup>
 </Project>

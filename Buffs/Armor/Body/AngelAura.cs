@@ -2,6 +2,7 @@
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.ModLoader;
 using Vitrium.Core;
 
 namespace Vitrium.Buffs.Armor.Body
@@ -53,17 +54,22 @@ namespace Vitrium.Buffs.Armor.Body
 		public override string Tooltip => "Heroes never die!";
 		public override string Texture => $"Terraria/buff_{BuffID.PaladinsShield}";
 
+		public override void ResetEffects(VPlayer player)
+		{
+			player.player.buffImmune[ModContent.BuffType<AngelBuff>()] = false;
+		}
+
 		public override void PostUpdate(VPlayer player)
 		{
 			AngelBuff buff = Vitrium.GetBuff<AngelBuff>();
 			player.player.buffImmune[buff.Type] = true;
 
-			foreach (Player member in Main.player.Where(a => a.active && a.team == player.player.team && player.player.Distance(a.Center) <= 1600 && !a.HasBuff(Vitrium.GetBuff<AngelDebuff>().Type)))
+			foreach (Player member in Main.player.Where(a => a.active && a.team == player.player.team && player.player.Distance(a.Center) <= 1600 && !a.HasBuff(ModContent.BuffType<AngelDebuff>())))
 			{
 				VPlayer.GetData(member).AddBuff(buff);
 			}
 
-			foreach (NPC friend in Main.npc.Where(a => a.active && (a.friendly || a.townNPC) && player.player.Distance(a.Center) <= 1600 && !a.HasBuff(Vitrium.GetBuff<AngelDebuff>().Type)))
+			foreach (NPC friend in Main.npc.Where(a => a.active && (a.friendly || a.townNPC) && player.player.Distance(a.Center) <= 1600 && !a.HasBuff(ModContent.BuffType<AngelDebuff>())))
 			{
 				VNPC.GetData(friend).AddBuff(buff);
 			}

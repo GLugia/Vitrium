@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Vitrium.Buffs;
 
@@ -81,6 +84,38 @@ namespace Vitrium.Core
 			}
 		}
 
+		public override bool PreDraw(NPC npc, SpriteBatch spriteBatch, Color drawColor)
+		{
+			bool b = base.PreDraw(npc, spriteBatch, drawColor);
+
+			foreach (VitriBuff buff in buffs)
+			{
+				b &= buff.PreDraw(this, spriteBatch, drawColor);
+			}
+
+			return b;
+		}
+
+		public override void PostDraw(NPC npc, SpriteBatch spriteBatch, Color drawColor)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.PostDraw(this, spriteBatch, drawColor);
+			}
+
+			if (npc.HasBuff(BuffID.Frozen))
+			{
+				Vector2 position = new Vector2((int)(npc.position.X - Main.screenPosition.X + (npc.width / 2f)), (int)(npc.position.Y - Main.screenPosition.Y + (npc.height / 2f)));
+				Color color = npc.GetAlpha(Lighting.GetColor((int)(npc.position.X + npc.width * 0.5) / 16, (int)(npc.position.Y + npc.height * 0.5) / 16, Color.White));
+				color.R = (byte)(color.R * 0.55);
+				color.G = (byte)(color.G * 0.55);
+				color.B = (byte)(color.B * 0.55);
+				color.A = (byte)(color.A * 0.55);
+
+				spriteBatch.Draw(Main.frozenTexture, position, new Rectangle(0, 0, Main.frozenTexture.Width, Main.frozenTexture.Height), color, npc.rotation, new Vector2(Main.frozenTexture.Width / 2f, Main.frozenTexture.Height / 2f), 1f, SpriteEffects.None, 0f);
+			}
+		}
+
 		public override bool PreAI(NPC npc)
 		{
 			bool b = base.PreAI(npc);
@@ -88,6 +123,12 @@ namespace Vitrium.Core
 			foreach (VitriBuff buff in buffs)
 			{
 				b &= buff.PreAI(this);
+			}
+
+			if (npc.HasBuff(BuffID.Frozen))
+			{
+				b = false;
+				npc.velocity *= 0f;
 			}
 
 			return b;
@@ -99,19 +140,42 @@ namespace Vitrium.Core
 			{
 				buff.AI(this);
 			}
+
+			if (npc.HasBuff(BuffID.Chilled))
+			{
+				npc.velocity *= 0.9f;
+			}
+		}
+
+		public override void PostAI(NPC npc)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.PostAI(this);
+			}
 		}
 
 		public override bool PreNPCLoot(NPC npc)
 		{
+			bool b = base.PreNPCLoot(npc);
+
 			foreach (VitriBuff buff in buffs)
 			{
-				if (!buff.PreNPCLoot(this))
-				{
-					return false;
-				}
+				b &= buff.PreNPCLoot(this);
 			}
 
-			return base.PreNPCLoot(npc);
+			return b;
+		}
+
+		public override void NPCLoot(NPC npc)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.NPCLoot(this);
+			}
+
+			bufftuples = null;
+			buffbuffer = null;
 		}
 
 		public override void UpdateLifeRegen(NPC npc, ref int damage)
@@ -119,6 +183,34 @@ namespace Vitrium.Core
 			foreach (VitriBuff buff in buffs)
 			{
 				buff.UpdateLifeRegen(this, ref damage);
+			}
+		}
+
+		public override void ModifyHitPlayer(NPC npc, Player target, ref int damage, ref bool crit)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.ModifyHitPlayer(this, target, ref damage, ref crit);
+			}
+
+			if (npc.HasBuff(BuffID.Frozen))
+			{
+				damage = 0;
+				crit = false;
+			}
+		}
+
+		public override void ModifyHitNPC(NPC npc, NPC target, ref int damage, ref float knockback, ref bool crit)
+		{
+			foreach (VitriBuff buff in buffs)
+			{
+				buff.ModifyHitNPC(this, target, ref damage, ref knockback, ref crit);
+			}
+
+			if (npc.HasBuff(BuffID.Frozen))
+			{
+				damage = 0;
+				crit = false;
 			}
 		}
 	}

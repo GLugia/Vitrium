@@ -2,6 +2,7 @@ using log4net;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Terraria;
@@ -27,19 +28,22 @@ namespace Vitrium
 		internal static IEnumerable<VitriBuff> VitriBuffs;
 		internal static IEnumerable<FieldInfo> VanillaBuffs;
 
-		public override void Load()
+		public Vitrium() : base()
 		{
 			Instance = this;
+		}
 
+		public override void Load()
+		{
 			AutoBuild.Load();
 
 			Main.instance.Exiting += ForceUnload;
 
+			VitriBuffs = Code.GetTypes().Where(a => !a.IsAbstract && a.IsSubclassOf(typeof(VitriBuff))).Select(a => GetBuff(a.Name) as VitriBuff).Distinct();
+			VanillaBuffs = Main.instance.GetType().Assembly.GetTypes().FirstOrDefault(a => a.Name == "BuffID").GetRuntimeFields();
+
 			if (!Main.dedServ)
 			{
-				VitriBuffs = Code.GetTypes().Where(a => !a.IsAbstract && a.IsSubclassOf(typeof(VitriBuff))).Select(a => GetBuff(a.Name) as VitriBuff).Distinct();
-				VanillaBuffs = Main.instance.GetType().Assembly.GetTypes().FirstOrDefault(a => a.Name == "BuffID").GetRuntimeFields();
-
 				UI = new UserInterface();
 
 				UIState = new AltarUI();
@@ -108,6 +112,8 @@ namespace Vitrium
 			Instance = null;
 		}
 
+		private Stopwatch sw;
+
 		public override void PreUpdateEntities()
 		{
 			foreach (Projectile proj in Main.projectile.Where(a => a != null && a.active && a.minion))
@@ -128,14 +134,11 @@ namespace Vitrium
 
 		public static int GetVanillaBuff(string name)
 		{
-			if (VanillaBuffs != null)
-			{
-				FieldInfo first = VanillaBuffs.FirstOrDefault(a => a.Name.IsSimilarTo(name));
+			FieldInfo first = VanillaBuffs?.FirstOrDefault(a => a.Name.IsSimilarTo(name));
 
-				if (first != null)
-				{
-					return (int)first.GetValue(Main.instance);
-				}
+			if (first != null)
+			{
+				return (int)first.GetValue(Main.instance);
 			}
 
 			return -1;

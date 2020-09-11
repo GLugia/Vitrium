@@ -127,14 +127,20 @@ namespace Vitrium.Core
 
 		public override void NetSend(Item item, BinaryWriter writer)
 		{
-			writer.Write(Hash);
-			writer.Write(buff?.UnderlyingName);
+			writer.Write(Hash ?? "NULL");
+			writer.Write(buff?.UnderlyingName ?? "NULL");
 		}
 
 		public override void NetReceive(Item item, BinaryReader reader)
 		{
 			Hash = reader.ReadString();
-			buff = (VitriBuff)Vitrium.Instance.GetBuff(reader.ReadString());
+			if (Hash == "NULL")
+			{
+				Hash = null;
+			}
+
+			string buffname = reader.ReadString();
+			buff = buffname == "NULL" ? null : (VitriBuff)Vitrium.Instance.GetBuff(buffname);
 			buff?.NetReceive(item, reader);
 		}
 
