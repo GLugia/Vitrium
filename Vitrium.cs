@@ -112,8 +112,6 @@ namespace Vitrium
 			Instance = null;
 		}
 
-		private Stopwatch sw;
-
 		public override void PreUpdateEntities()
 		{
 			foreach (Projectile proj in Main.projectile.Where(a => a != null && a.active && a.minion))

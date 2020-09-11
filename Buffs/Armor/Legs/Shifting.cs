@@ -109,7 +109,6 @@ namespace Vitrium.Buffs.Armor.Legs
 				Vector2 position = player.player.position;
 				int width = player.player.width;
 				int height = player.player.height;
-				int attempts = 0;
 
 				for (int i = 0; i <= 240; i++)
 				{
