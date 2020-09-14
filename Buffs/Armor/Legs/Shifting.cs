@@ -105,76 +105,61 @@ namespace Vitrium.Buffs.Armor.Legs
 
 			if (flag)
 			{
-				Vector2 direction = new Vector2(15 * 16 * lor, 15 * 16 * uod);
+				Vector2 direction = new Vector2(240 * lor, 240 * uod);
 				Vector2 position = player.player.position;
 				int width = player.player.width;
 				int height = player.player.height;
-
-				for (int i = 0; i <= 240; i++)
+				int i = 0;
+				while (i <= 240 && !(direction == default))
 				{
-					if (direction == default)
-					{
-						break;
-					}
-
 					for (int val = -5; val < 6; val++)
 					{
-						Vector2 destination = position + new Vector2(direction.X, direction.Y - (val * 16));
-						if (!Collision.SolidCollision(destination, width, height)
-							&& Collision.SolidCollision(destination + new Vector2(0, 16), width, height))
+						Vector2 destination = position + new Vector2(direction.X, direction.Y - val * 16);
+						if (!Collision.SolidCollision(destination, width, height) && Collision.SolidCollision(destination + new Vector2(0f, 16f), width, height))
 						{
-							direction = new Vector2(direction.X, direction.Y - (val * 16));
+							direction = new Vector2(direction.X, direction.Y - val * 16);
 							break;
 						}
 					}
-
 					if (!Collision.SolidCollision(position + direction, width, height))
 					{
 						break;
 					}
-
-					if (direction.X > 0)
+					if (direction.X > 0f)
 					{
-						direction.X--;
+						direction.X -= 1f;
 					}
-
-					if (direction.X < 0)
+					if (direction.X < 0f)
 					{
-						direction.X++;
+						direction.X += 1f;
 					}
-
-					if (direction.Y > 0)
+					if (direction.Y > 0f)
 					{
-						direction.Y--;
+						direction.Y -= 1f;
 					}
-
-					if (direction.Y < 0)
+					if (direction.Y < 0f)
 					{
-						direction.Y++;
+						direction.Y += 1f;
 					}
+					i++;
 				}
-
 				float ox = position.X;
 				float oy = position.Y;
 				player.player.grapCount = 0;
 				player.player.teleporting = true;
-				player.player.Teleport(player.player.position + direction, 0);
-
-				if (uod == -1 && lor == 0 && direction.X == 0)
+				player.player.Teleport(player.player.position + direction, 0, 0);
+				if (uod == -1 && lor == 0 && direction.X == 0f)
 				{
 					player.player.position.X = ox;
 				}
-
-				if (uod == 0 && lor != 0 && direction.Y == 0)
+				if (uod == 0 && lor != 0 && direction.Y == 0f)
 				{
 					player.player.position.Y = oy;
 				}
-
 				player.player.dashDelay = 120;
-
 				if (Main.netMode != NetmodeID.SinglePlayer)
 				{
-					NetMessage.SendData(MessageID.Teleport, -1, -1, null, player.player.whoAmI, player.player.position.X, player.player.position.Y, 0);
+					NetMessage.SendData(MessageID.Teleport, -1, -1, null, player.player.whoAmI, player.player.position.X, player.player.position.Y, 0f, 0, 0, 0);
 				}
 			}
 		}

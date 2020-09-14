@@ -49,7 +49,8 @@ namespace Vitrium.Buffs
 		// Useless methods
 		public sealed override bool Autoload(ref string name, ref string texture)
 		{
-			Main.NewText(Texture);
+			name = GetType().Name.ToLower();
+
 			if (!Texture.Contains("Terraria"))
 			{
 				texture = "Vitrium/Buffs/Assets/" + Texture;

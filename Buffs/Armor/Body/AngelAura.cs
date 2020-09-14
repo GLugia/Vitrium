@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using Terraria;
+﻿using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Vitrium.Core;
+using Vitrium.Core.Cache;
 
 namespace Vitrium.Buffs.Armor.Body
 {
@@ -23,7 +23,12 @@ namespace Vitrium.Buffs.Armor.Body
 			if (player.player.statLife - (damage * (crit ? 2 : 1)) <= 0)
 			{
 				player.player.statLife = player.player.statLifeMax2 + damage;
-				player.AddBuff(Vitrium.GetBuff<AngelDebuff>(), 108000);
+				player.player.AddBuff("angeldebuff", 108000);
+
+				if (Main.netMode != NetmodeID.SinglePlayer)
+				{
+					NetMessage.SendData(MessageID.PlayerHealth, -1, -1, null, player.player.whoAmI, player.player.statLife, player.player.statLifeMax, player.player.statLifeMax2);
+				}
 			}
 
 			return true;
@@ -56,22 +61,29 @@ namespace Vitrium.Buffs.Armor.Body
 
 		public override void ResetEffects(VPlayer player)
 		{
-			player.player.buffImmune[ModContent.BuffType<AngelBuff>()] = false;
+			player.player.MakeWeakTo("angelbuff");
 		}
 
 		public override void PostUpdate(VPlayer player)
 		{
-			AngelBuff buff = Vitrium.GetBuff<AngelBuff>();
-			player.player.buffImmune[buff.Type] = true;
+			player.player.MakeImmuneTo("angelbuff");
 
-			foreach (Player member in Main.player.Where(a => a.active && a.team == player.player.team && player.player.Distance(a.Center) <= 1600 && !a.HasBuff(ModContent.BuffType<AngelDebuff>())))
+			for (int i = 0; i < Main.npc.Length; i++)
 			{
-				VPlayer.GetData(member).AddBuff(buff);
-			}
+				if (i < 255)
+				{
+					Player member = Main.player[i];
+					if (member.active && !member.dead && !member.ghost && member.team == player.player.team && player.player.Distance(member.Center) <= Main.spawnTileX / 2 && !member.HasBuff(ModContent.BuffType<AngelDebuff>()))
+					{
+						member.AddBuff("angelbuff");
+					}
+				}
 
-			foreach (NPC friend in Main.npc.Where(a => a.active && (a.friendly || a.townNPC) && player.player.Distance(a.Center) <= 1600 && !a.HasBuff(ModContent.BuffType<AngelDebuff>())))
-			{
-				VNPC.GetData(friend).AddBuff(buff);
+				NPC friend = Main.npc[i];
+				if (friend.active && (friend.friendly || friend.townNPC) && player.player.Distance(friend.Center) <= Main.spawnTileX / 2 && !friend.HasBuff(ModContent.BuffType<AngelDebuff>()))
+				{
+					Main.npc[i].AddBuff("angelbuff");
+				}
 			}
 		}
 	}

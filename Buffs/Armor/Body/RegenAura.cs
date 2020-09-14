@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using Terraria;
+﻿using Terraria;
 using Vitrium.Core;
+using Vitrium.Core.Cache;
 
 namespace Vitrium.Buffs.Armor.Body
 {
@@ -34,22 +34,29 @@ namespace Vitrium.Buffs.Armor.Body
 
 		public override void ResetEffects(VPlayer player)
 		{
-			player.player.buffImmune[Vitrium.GetBuff<RegenBuff>().Type] = false;
+			player.player.MakeWeakTo("regenbuff");
 		}
 
 		public override void PostUpdate(VPlayer player)
 		{
-			RegenBuff buff = Vitrium.GetBuff<RegenBuff>();
-			player.player.buffImmune[buff.Type] = true;
+			player.player.MakeImmuneTo("regenbuff");
 
-			foreach (Player member in Main.player.Where(a => a.active && a.team == player.player.team && player.player.Distance(a.Center) <= 1600))
+			for (int i = 0; i < Main.npc.Length; i++)
 			{
-				VPlayer.GetData(member).AddBuff(buff);
-			}
+				if (i < 255)
+				{
+					Player member = Main.player[i];
+					if (member.active && !member.dead && !member.ghost && member.team == player.player.team && player.player.Distance(member.Center) <= Main.spawnTileX / 2)
+					{
+						Main.player[i].AddBuff("regenbuff");
+					}
+				}
 
-			foreach (NPC npc in Main.npc.Where(a => a.active && (a.townNPC || a.friendly) && player.player.Distance(a.Center) <= 1600))
-			{
-				VNPC.GetData(npc).AddBuff(buff);
+				NPC friend = Main.npc[i];
+				if (friend.active && (friend.friendly || friend.townNPC) && player.player.Distance(friend.Center) <= Main.spawnTileX / 2)
+				{
+					Main.player[i].AddBuff("regenbuff");
+				}
 			}
 		}
 	}

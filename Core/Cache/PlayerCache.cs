@@ -1,6 +1,7 @@
 ﻿using System;
 using Terraria;
 using Terraria.ModLoader;
+using Vitrium.Buffs;
 
 namespace Vitrium.Core.Cache
 {
@@ -19,8 +20,6 @@ namespace Vitrium.Core.Cache
 
 		public override void PostUpdate()
 		{
-			VPlayer vp = VPlayer.GetData(player);
-
 			if (Main.mouseItem != mouse)
 			{
 				mouse = Main.mouseItem; // cache mouse item
@@ -33,14 +32,24 @@ namespace Vitrium.Core.Cache
 
 			if (mouse != null && mouse.IsValid() && mouse.Enchantable() && (mouse.IsWeapon() || mouse.IsTool()))
 			{
-				vp.AddBuff(VItem.GetData(mouse).buff); // prioritize mouse item buff
+				VitriBuff data = VItem.GetData(mouse).buff;
+
+				if (data != null)
+				{
+					player.AddBuff(data.GetType().Name);
+				}
 			}
 			else if (player.inventory[selected] != null
 				&& player.inventory[selected].IsValid()
 				&& player.inventory[selected].Enchantable()
 				&& (player.inventory[selected].IsWeapon() || player.inventory[selected].IsTool()))
 			{
-				vp.AddBuff(VItem.GetData(player.inventory[selected]).buff); // otherwise selected item buff
+				VitriBuff data = VItem.GetData(player.inventory[selected]).buff;
+
+				if (data != null)
+				{
+					player.AddBuff(data.GetType().Name);
+				}
 			}
 
 			if (equips.Length < 8 + player.extraAccessorySlots)
@@ -58,7 +67,12 @@ namespace Vitrium.Core.Cache
 
 				if (equips[i] != null && equips[i].IsValid() && equips[i].Enchantable())
 				{
-					vp.AddBuff(VItem.GetData(equips[i]).buff);
+					VitriBuff data = VItem.GetData(equips[i]).buff;
+
+					if (data != null)
+					{
+						player.AddBuff(data.GetType().Name);
+					}
 				}
 			}
 		}

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Vitrium.Core;
@@ -12,30 +14,63 @@ namespace Vitrium.Buffs.Weapons.Ranged
 		public override string Tooltip => "Are you sure you're using the right ammo?";
 		public override string Texture => $"Terraria/buff_{BuffID.Archery}";
 
+		public override bool ConsumeAmmo(VPlayer player, Item weapon, Item ammo)
+		{
+			return base.ConsumeAmmo(player, weapon, ammo);
+		}
+
 		public override void OnConsumeAmmo(VPlayer player, Item weapon, Item ammo)
 		{
-			System.Reflection.FieldInfo[] ids = Main.instance.GetType().Assembly.GetTypes().FirstOrDefault(a => a.Name.IsSimilarTo("projectileid")).GetFields();
+			// make it so the player chooses which ammo types to pick from by scanning their inventory and adding ammo items to a list
+			// probably do this in Shoot
+			Type[] types = Main.instance.GetType().Assembly.GetTypes();
+			FieldInfo[] projectiles = null;
 
-			if (ammo.ammo == AmmoID.Arrow)
+			for (int i = 0; i < types.Length; i++)
 			{
-				System.Reflection.FieldInfo[] arrows = ids.Where(a => a.Name.Contains("Arrow") && !a.Name.Contains("Hostile") && !a.Name.IsSimilarTo("FlamingArrow")).ToArray();
-				System.Reflection.FieldInfo selected = arrows[Main.rand.Next(0, arrows.Length)];
-				ammo.shoot = (short)selected.GetValue(Main.instance);
+				if (types[i].Name.IsSimilarTo("projectileid"))
+				{
+					projectiles = types[i].GetFields();
+					break;
+				}
+			}
 
-			}
-			else if (ammo.ammo == AmmoID.Bullet)
+			if (projectiles == null)
 			{
-				System.Reflection.FieldInfo[] bullets = ids.Where(a => a.Name.Contains("Bullet")).ToArray();
-				System.Reflection.FieldInfo selected = bullets[Main.rand.Next(0, bullets.Length)];
-				ammo.shoot = (short)selected.GetValue(Main.instance);
+				return;
 			}
-			else if (weapon.Name != "Rocket Launcher" && ammo.ammo == AmmoID.Rocket)
+
+			List<FieldInfo> fields = new List<FieldInfo>();
+
+			for (int i = 0; i < projectiles.Length; i++)
 			{
-				// @TODO probably need an offset for certain weapons for some reason
-				System.Reflection.FieldInfo[] rockets = ids.Where(a => a.Name.Contains("Rocket")).ToArray();
-				System.Reflection.FieldInfo selected = rockets[Main.rand.Next(0, rockets.Length)];
-				ammo.shoot = (short)selected.GetValue(Main.instance);
+				FieldInfo projInfo = projectiles[i];
+				bool Contains(string val)
+				{
+					return projInfo.Name.Contains(val);
+				}
+
+				if (ammo.ammo == AmmoID.Arrow
+					&& Contains("Arrow")
+					&& !Contains("Hostile")
+					&& !projInfo.Name.IsSimilarTo("FlamingArrow"))
+				{
+					fields.Add(projInfo);
+				}
+				else if (ammo.ammo == AmmoID.Bullet
+					&& Contains("Bullet"))
+				{
+					fields.Add(projInfo);
+				}
+				else if (ammo.ammo == AmmoID.Rocket
+					&& Contains("Rocket"))
+				{
+					fields.Add(projInfo);
+				}
 			}
+
+			FieldInfo selected = fields[Main.rand.Next(0, fields.Count)];
+			ammo.shoot = (int)selected.GetValue(Main.instance);
 		}
 	}
 }

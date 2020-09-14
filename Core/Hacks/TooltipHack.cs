@@ -176,32 +176,30 @@ namespace Vitrium.Core.Hacks
 		{
 			float defcol = Main.mouseTextColor / 255f;
 			int alpha = Main.mouseTextColor;
-
 			if (a == 0f && b != 0f)
 			{
 				if (b > 0f)
 				{
-					on = 1;
-					col = new Color((byte)(120f * defcol), (byte)(190f * defcol), (byte)(120f * defcol), alpha);
+					on = 1.0;
+					col = new Color?(new Color((byte)(120f * defcol), (byte)(190f * defcol), (byte)(120f * defcol), alpha));
 					return "+" + b.ToString(CultureInfo.InvariantCulture);
 				}
-
-				on = -1;
-				col = new Color((byte)(190f * defcol), (byte)(120f * defcol), (byte)(120f * defcol), alpha);
+				on = -1.0;
+				col = new Color?(new Color((byte)(190f * defcol), (byte)(120f * defcol), (byte)(120f * defcol), alpha));
 				return "-" + b.ToString(CultureInfo.InvariantCulture);
 			}
-
-			double diff = Math.Ceiling(((b - a) / a) * 100.0);
-			on = diff;
-
-			if (diff > 0)
+			else
 			{
-				col = new Color((byte)(120f * defcol), (byte)(190f * defcol), (byte)(120f * defcol), alpha);
-				return "+" + diff.ToString(CultureInfo.InvariantCulture);
+				double diff = Math.Ceiling((b - a) / a * 100.0);
+				on = diff;
+				if (diff > 0.0)
+				{
+					col = new Color?(new Color((byte)(120f * defcol), (byte)(190f * defcol), (byte)(120f * defcol), alpha));
+					return "+" + diff.ToString(CultureInfo.InvariantCulture);
+				}
+				col = new Color?(new Color((byte)(190f * defcol), (byte)(120f * defcol), (byte)(120f * defcol), alpha));
+				return diff.ToString(CultureInfo.InvariantCulture);
 			}
-
-			col = new Color((byte)(190f * defcol), (byte)(120f * defcol), (byte)(120f * defcol), alpha);
-			return diff.ToString(CultureInfo.InvariantCulture);
 		}
 	}
 }

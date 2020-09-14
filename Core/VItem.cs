@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Terraria.Utilities;
 using Vitrium.Buffs;
+using Vitrium.Core.Cache;
 using Vitrium.Core.Hacks;
 
 namespace Vitrium.Core
@@ -23,36 +22,25 @@ namespace Vitrium.Core
 
 		public VitriBuff[] NewBuffs(Item item)
 		{
-			WeightedRandom<VitriBuff> wr = new WeightedRandom<VitriBuff>();
-
-			foreach (VitriBuff buff in Vitrium.VitriBuffs.Where(a => a.IApplicableTo(item)))
-			{
-				wr.Add(buff, buff.Weight);
-				wr.Add(null, buff.Weight * 0.25f);
-			}
-
 			VitriBuff[] ret = new VitriBuff[3];
-
+			int i = 0;
 			int j = 0;
-			for (int i = 0; i < 3; i++)
+			while (j < 3)
 			{
-				VitriBuff buff = wr.Get();
-
-				ret[j] = wr.Get();
-
-				if (ret[j] != null)
+				ret[i] = BuffCache.GetRandomBuff(item);
+				if (ret[i] != null)
 				{
-					j++;
+					i++;
 				}
+				j++;
 			}
-
 			return ret;
 		}
 
 		public override bool OnPickup(Item item, Player player) // @TODO only if null and has not rolled
 		{
-			VItem data = GetData(item);
 			VitriBuff[] buffs = NewBuffs(item);
+			VItem data = GetData(item);
 			data.buff = buffs[Main.rand.Next(0, buffs.Length)];
 			data.Hash = Main.rand.NextString();
 			return base.OnPickup(item, player);
@@ -60,8 +48,8 @@ namespace Vitrium.Core
 
 		public override void PostReforge(Item item)
 		{
-			VItem data = GetData(item);
 			VitriBuff[] buffs = NewBuffs(item);
+			VItem data = GetData(item);
 			data.buff = buffs[Main.rand.Next(0, buffs.Length)];
 			data.Hash = Main.rand.NextString();
 			base.PostReforge(item);

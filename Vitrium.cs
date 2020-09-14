@@ -3,12 +3,9 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Vitrium.Buffs;
 using Vitrium.Core;
 using Vitrium.Core.Cache;
 using Vitrium.UI;
@@ -24,12 +21,11 @@ namespace Vitrium
 		internal UserInterface UI;
 		internal AltarUI UIState;
 		private GameTime lastUpdateGameTime;
-
-		internal static IEnumerable<VitriBuff> VitriBuffs;
-		internal static IEnumerable<FieldInfo> VanillaBuffs;
+		private readonly Stopwatch sw;
 
 		public Vitrium() : base()
 		{
+			sw = Stopwatch.StartNew();
 			Instance = this;
 		}
 
@@ -38,9 +34,7 @@ namespace Vitrium
 			AutoBuild.Load();
 
 			Main.instance.Exiting += ForceUnload;
-
-			VitriBuffs = Code.GetTypes().Where(a => !a.IsAbstract && a.IsSubclassOf(typeof(VitriBuff))).Select(a => GetBuff(a.Name) as VitriBuff).Distinct();
-			VanillaBuffs = Main.instance.GetType().Assembly.GetTypes().FirstOrDefault(a => a.Name == "BuffID").GetRuntimeFields();
+			BuffCache.Load(this);
 
 			if (!Main.dedServ)
 			{
@@ -49,6 +43,9 @@ namespace Vitrium
 				UIState = new AltarUI();
 				//UIState.Activate();
 			}
+
+			sw.Stop();
+			Logger.Debug($"Initializing took {sw.Elapsed.TotalMilliseconds}ms");
 		}
 
 		public override void UpdateUI(GameTime gameTime)
@@ -104,8 +101,7 @@ namespace Vitrium
 
 		public override void Unload()
 		{
-			VitriBuffs = null;
-			VanillaBuffs = null;
+			BuffCache.Unload();
 			UI = null;
 			UIState?.Deactivate();
 			UIState = null;
@@ -114,37 +110,7 @@ namespace Vitrium
 
 		public override void PreUpdateEntities()
 		{
-			foreach (Projectile proj in Main.projectile.Where(a => a != null && a.active && a.minion))
-			{
-				ProjCache.GetData(proj).ApplyBuffs();
-			}
-
-			foreach (Player player in Main.player.Where(a => a != null && a.active))
-			{
-				VPlayer.GetData(player).ApplyBuffs();
-			}
-
-			foreach (NPC npc in Main.npc.Where(a => a != null && a.active))
-			{
-				VNPC.GetData(npc).ApplyBuffs();
-			}
-		}
-
-		public static int GetVanillaBuff(string name)
-		{
-			FieldInfo first = VanillaBuffs?.FirstOrDefault(a => a.Name.IsSimilarTo(name));
-
-			if (first != null)
-			{
-				return (int)first.GetValue(Main.instance);
-			}
-
-			return -1;
-		}
-
-		public static new T GetBuff<T>() where T : VitriBuff
-		{
-			return (T)BuffLoader.GetBuff(ModContent.BuffType<T>());
+			BuffCache.ApplyAllBuffs();
 		}
 	}
 }

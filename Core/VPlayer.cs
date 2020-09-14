@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Vitrium.Buffs;
+using Vitrium.Core.Cache;
 
 namespace Vitrium.Core
 {
@@ -14,47 +14,23 @@ namespace Vitrium.Core
 			return player.GetModPlayer<VPlayer>();
 		}
 
-		private List<(VitriBuff buff, int duration)> bufftuples;
-		private List<(VitriBuff buff, int duration)> buffbuffer;
-		internal IEnumerable<VitriBuff> buffs => bufftuples?.Select(a => a.buff) ?? Enumerable.Empty<VitriBuff>();
-		public T GetBuff<T>() where T : VitriBuff
-		{
-			return (T)buffs?.FirstOrDefault(a => a.GetType() == typeof(T));
-		}
-
-		public void AddBuff(VitriBuff buff, int duration = 2)
-		{
-			if (buff != null && !buffbuffer.Select(a => a.buff).Contains(buff) && !player.buffImmune[buff.Type])
-			{
-				buffbuffer.Add((buff, duration));
-			}
-		}
-
-		internal void ApplyBuffs()
-		{
-			bufftuples.Clear();
-			bufftuples.AddRange(buffbuffer);
-			buffbuffer.Clear();
-
-			foreach ((VitriBuff buff, int duration) in bufftuples)
-			{
-				int vanilla = Vitrium.GetVanillaBuff(buff.Name);
-
-				if (vanilla != -1)
-				{
-					player.AddBuff(vanilla, duration);
-				}
-				else
-				{
-					player.AddBuff(buff.Type, duration);
-				}
-			}
-		}
+		public int GlobalID { get; internal set; }
+		public IEnumerable<VitriBuff> buffs => BuffCache.GetPlayerBuffs(GlobalID);
 
 		public override void Initialize()
 		{
-			bufftuples = new List<(VitriBuff, int)>();
-			buffbuffer = new List<(VitriBuff, int)>();
+			GlobalID = BuffCache.ReservePlayer();
+			Vitrium.Logger.Debug($"PLR: Reserved {GlobalID} for {player.name}");
+		}
+
+		public override void PlayerConnect(Player player)
+		{
+			player.GetPlayer().GlobalID = BuffCache.ReservePlayer();
+		}
+
+		public override void PlayerDisconnect(Player player)
+		{
+			BuffCache.DeletePlayer(player.GetPlayer().GlobalID);
 		}
 
 		public override void SetupStartInventory(IList<Item> items, bool mediumcoreDeath)
@@ -246,9 +222,6 @@ namespace Vitrium.Core
 			{
 				buff.Kill(this, damage, hitDirection, pvp, damageSource);
 			}
-
-			bufftuples = null;
-			buffbuffer = null;
 		}
 
 		public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)

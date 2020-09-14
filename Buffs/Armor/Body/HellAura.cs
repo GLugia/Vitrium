@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using Terraria;
+﻿using Terraria;
 using Vitrium.Core;
+using Vitrium.Core.Cache;
 
 namespace Vitrium.Buffs.Armor.Body
 {
@@ -35,22 +35,29 @@ namespace Vitrium.Buffs.Armor.Body
 
 		public override void ResetEffects(VPlayer player)
 		{
-			player.player.buffImmune[Vitrium.GetBuff<HellDebuff>().Type] = false;
+			player.player.MakeWeakTo("helldebuff");
 		}
 
 		public override void PostUpdate(VPlayer player)
 		{
-			HellDebuff debuff = Vitrium.GetBuff<HellDebuff>();
-			player.player.buffImmune[debuff.Type] = true;
+			player.player.MakeImmuneTo("helldebuff");
 
-			foreach (Player member in Main.player.Where(a => a.active && a.team != player.player.team && player.player.Distance(a.Center) <= Main.spawnTileX))
+			for (int i = 0; i < Main.npc.Length; i++)
 			{
-				VPlayer.GetData(member).AddBuff(debuff);
-			}
+				if (i < 255)
+				{
+					Player member = Main.player[i];
+					if (member.active && !member.dead && !member.ghost && member.team == player.player.team && player.player.Distance(member.Center) <= Main.spawnTileY / 1.5)
+					{
+						Main.player[i].AddBuff("helldebuff");
+					}
+				}
 
-			foreach (NPC friend in Main.npc.Where(a => a.active && !a.townNPC && player.player.Distance(a.Center) <= 1600))
-			{
-				VNPC.GetData(friend).AddBuff(debuff);
+				NPC friend = Main.npc[i];
+				if (friend.active && (!friend.friendly || !friend.townNPC) && player.player.Distance(friend.Center) <= Main.spawnTileY / 1.5)
+				{
+					Main.npc[i].AddBuff("helldebuff");
+				}
 			}
 		}
 	}

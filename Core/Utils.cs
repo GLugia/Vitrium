@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.Utilities;
@@ -72,7 +71,7 @@ namespace Vitrium.Core
 
 		public static bool IsValid(this Item item)
 		{
-			return item != null && item.active && !item.IsAir && item.type > ItemID.None;
+			return item.active && !item.IsAir && item.type > ItemID.None;
 		}
 
 		public static bool IsTheSameAs_(this Item item, Item item2)
@@ -154,17 +153,29 @@ namespace Vitrium.Core
 
 		public static bool IsEquippedArmor(this Item item, Player player, out int index)
 		{
-			Item[] armor = player.armor.Take(8 + player.extraAccessorySlots).ToArray();
+			Item[] armor = new Item[8 + player.extraAccessorySlots];
+
+			for (int i = 0; i < 8 + player.extraAccessorySlots; i++)
+			{
+				armor[i] = player.armor[i];
+			}
+
 			index = Array.IndexOf(armor, item);
 			return index != -1;
 		}
 
 		public static bool IsEquippedVanity(this Item item, Player player, out int index)
 		{
-			Item[] vanity = player.armor.Skip(8 + player.extraAccessorySlots).Take(8 + player.extraAccessorySlots).ToArray();
-			int i = Array.IndexOf(vanity, item);
-			index = i + 8 + (player.extraAccessorySlots * 2);
-			return i != -1;
+			Item[] vanity = new Item[8 + player.extraAccessorySlots];
+
+			for (int i = 8 + player.extraAccessorySlots; i < (8 + player.extraAccessorySlots) * 2; i++)
+			{
+				vanity[i - (8 + player.extraAccessorySlots)] = player.armor[i];
+			}
+
+			int id = Array.IndexOf(vanity, item);
+			index = id + ((8 + player.extraAccessorySlots) * 2);
+			return index != -1;
 		}
 
 		public static bool IsInInventory(this Item item, Player player, out int index)
@@ -175,7 +186,16 @@ namespace Vitrium.Core
 
 		public static bool TryFindOwner(this Item item, out Player player, out Item[] location, out int index)
 		{
-			player = Main.player.FirstOrDefault(a => a != null && (item.IsInInventory(a, out int _) || item.IsEquippedArmor(a, out int _) || item.IsEquippedVanity(a, out int _)));
+			player = null;
+
+			for (int i = 0; i < 255; i++)
+			{
+				player = Main.player[i];
+				if (!item.IsInInventory(player, out int _) && !item.IsEquippedArmor(player, out int _) && !item.IsEquippedVanity(player, out int _))
+				{
+					player = null;
+				}
+			}
 
 			if (player != null)
 			{
@@ -201,7 +221,77 @@ namespace Vitrium.Core
 
 		public static Item GetEquip(this Player player, Func<Item, bool> predicate)
 		{
-			return player.armor.Take(8 + player.extraAccessorySlots).FirstOrDefault(predicate);
+			for (int i = 0; i < 8 + player.extraAccessorySlots; i++)
+			{
+				if (predicate.Invoke(player.armor[i]))
+				{
+					return player.armor[i];
+				}
+			}
+
+			return null;
+		}
+
+		public static bool Contains(this string str, params string[] strings)
+		{
+			bool b = true;
+
+			foreach (string s in strings)
+			{
+				b &= str.Contains(s);
+			}
+
+			return b;
+		}
+
+		public static bool Contains<T>(this IEnumerable<T> list, T obj)
+		{
+			foreach (T item in list)
+			{
+				if (item.Equals(obj))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static T FirstOrDefault<T>(this IEnumerable<T> list, Func<T, bool> predicate)
+		{
+			foreach (T obj in list)
+			{
+				if (predicate.Invoke(obj))
+				{
+					return obj;
+				}
+			}
+
+			return default;
+		}
+
+		public static T FirstOrDefault<T>(this T[] array, Func<T, bool> predicate)
+		{
+			foreach (T obj in array)
+			{
+				if (predicate.Invoke(obj))
+				{
+					return obj;
+				}
+			}
+
+			return default;
+		}
+
+		public static bool TryAdd<T1, T2>(this IDictionary<T1, T2> dict, T1 key, T2 value)
+		{
+			if (dict.ContainsKey(key))
+			{
+				return false;
+			}
+
+			dict.Add(key, value);
+			return true;
 		}
 	}
 }

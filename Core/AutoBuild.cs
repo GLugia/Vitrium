@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Terraria;
 
 namespace Vitrium.Core
@@ -28,7 +27,7 @@ namespace Vitrium.Core
 
 		internal static void Save(bool updatebuild = false, bool updaterevision = true)
 		{
-			if (lines == null || !lines.Any())
+			if (lines == null || lines.Count <= 0)
 			{
 				return;
 			}

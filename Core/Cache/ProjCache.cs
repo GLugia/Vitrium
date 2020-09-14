@@ -19,17 +19,22 @@ namespace Vitrium.Core.Cache
 		public override bool InstancePerEntity => true;
 		public override bool CloneNewInstances => true;
 
-		public override void PostAI(Projectile projectile)
+		public override bool PreAI(Projectile projectile)
 		{
 			if (projectile.minion && buff == null)
 			{
 				buff = VItem.GetData(Main.player[projectile.owner].inventory[Main.player[projectile.owner].selectedItem]).buff;
 			}
+
+			return base.PreAI(projectile);
 		}
 
 		internal void ApplyBuffs()
 		{
-			VPlayer.GetData(Main.player[projectile.owner]).AddBuff(buff);
+			if (buff != null)
+			{
+				Main.player[projectile.owner].AddBuff(buff.Name);
+			}
 		}
 	}
 }
