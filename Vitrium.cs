@@ -8,6 +8,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Vitrium.Core;
 using Vitrium.Core.Cache;
+using Vitrium.Testing;
 using Vitrium.UI;
 
 namespace Vitrium
@@ -32,6 +33,7 @@ namespace Vitrium
 		public override void Load()
 		{
 			AutoBuild.Load();
+			TestEnchantGenerator.Build();
 
 			Main.instance.Exiting += ForceUnload;
 			BuffCache.Load(this);
@@ -110,6 +112,7 @@ namespace Vitrium
 
 		public override void PreUpdateEntities()
 		{
+			TestEnchantGenerator.MakeTag();
 			BuffCache.ApplyAllBuffs();
 		}
 	}

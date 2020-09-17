@@ -20,7 +20,6 @@ namespace Vitrium.Core
 		public override void Initialize()
 		{
 			GlobalID = BuffCache.ReservePlayer();
-			Vitrium.Logger.Debug($"PLR: Reserved {GlobalID} for {player.name}");
 		}
 
 		public override void PlayerConnect(Player player)
@@ -31,6 +30,7 @@ namespace Vitrium.Core
 		public override void PlayerDisconnect(Player player)
 		{
 			BuffCache.DeletePlayer(player.GetPlayer().GlobalID);
+			player.GetPlayer().GlobalID = 0;
 		}
 
 		public override void SetupStartInventory(IList<Item> items, bool mediumcoreDeath)

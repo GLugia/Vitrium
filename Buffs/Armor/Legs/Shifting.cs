@@ -146,20 +146,21 @@ namespace Vitrium.Buffs.Armor.Legs
 				float ox = position.X;
 				float oy = position.Y;
 				player.player.grapCount = 0;
-				player.player.teleporting = true;
-				player.player.Teleport(player.player.position + direction, 0, 0);
-				if (uod == -1 && lor == 0 && direction.X == 0f)
+				player.player.BetterTeleport(player.player.position + direction, 0);
+
+				if (Main.netMode != NetmodeID.Server)
 				{
-					player.player.position.X = ox;
-				}
-				if (uod == 0 && lor != 0 && direction.Y == 0f)
-				{
-					player.player.position.Y = oy;
-				}
-				player.player.dashDelay = 120;
-				if (Main.netMode != NetmodeID.SinglePlayer)
-				{
-					NetMessage.SendData(MessageID.Teleport, -1, -1, null, player.player.whoAmI, player.player.position.X, player.player.position.Y, 0f, 0, 0, 0);
+					if (uod == -1 && lor == 0 && direction.X == 0f)
+					{
+						player.player.position.X = ox;
+					}
+
+					if (uod == 0 && lor != 0 && direction.Y == 0f)
+					{
+						player.player.position.Y = oy;
+					}
+
+					player.player.dashDelay = 120;
 				}
 			}
 		}

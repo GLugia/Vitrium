@@ -158,6 +158,8 @@ namespace Vitrium.Core.Cache
 			AllPlayerBuffers = null;
 			AllNPCBuffs = null;
 			AllNPCBuffers = null;
+			NextNPCID = 0;
+			NextPlayerID = 0;
 			Mod = null;
 		}
 

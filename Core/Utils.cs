@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Terraria;
@@ -292,6 +293,17 @@ namespace Vitrium.Core
 
 			dict.Add(key, value);
 			return true;
+		}
+
+		public static void BetterTeleport(this Player player, Vector2 telePos, int style)
+		{
+			if (Main.netMode == NetmodeID.SinglePlayer)
+			{
+				player.Teleport(telePos, style, 0);
+				return;
+			}
+
+			NetMessage.SendData(MessageID.Teleport, -1, -1, null, 2, (float)player.whoAmI, telePos.X, telePos.Y, style, 0, 0);
 		}
 	}
 }
